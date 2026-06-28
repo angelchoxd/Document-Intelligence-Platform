@@ -82,6 +82,19 @@ streamlit run app.py
 
 ---
 
+## Sample Documents
+
+The repository includes sample documents inside the `sample_documents/` folder so you can immediately test the application.
+
+Included examples:
+
+- test_energy_report.pdf
+- test_notes.txt
+
+These files can be used to test document upload, OCR, semantic search, AI summaries, and chat functionality immediately after installation.
+
+---
+
 ## Screenshots
 
 ### Dashboard
