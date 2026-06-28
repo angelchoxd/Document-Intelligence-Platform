@@ -1,7 +1,11 @@
+import tempfile
+from pathlib import Path
+
 from pypdf import PdfReader
+from langchain_text_splitters import RecursiveCharacterTextSplitter
 
 from config import CHUNK_SIZE, CHUNK_OVERLAP
-from langchain_text_splitters import RecursiveCharacterTextSplitter
+from ocr_engine import extract_text_from_image
 
 
 def read_pdf(file):
@@ -37,11 +41,39 @@ def read_txt(file):
     return text, page_texts
 
 
-def read_uploaded_file(file):
+def read_image(file, ocr_engine="GLM-OCR"):
+    suffix = Path(file.name).suffix
+
+    with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as temp_file:
+        temp_file.write(file.getbuffer())
+        temp_image_path = temp_file.name
+
+    extracted_text = extract_text_from_image(
+        temp_image_path,
+        engine=ocr_engine
+    )
+
+    page_texts = [
+        {
+            "page": 1,
+            "text": extracted_text,
+        }
+    ]
+
+    return extracted_text, page_texts
+
+
+def read_uploaded_file(file, ocr_engine="GLM-OCR"):
     if file.type == "application/pdf":
         return read_pdf(file)
 
-    return read_txt(file)
+    if file.type == "text/plain":
+        return read_txt(file)
+
+    if file.type in ["image/png", "image/jpeg", "image/jpg"]:
+        return read_image(file, ocr_engine)
+
+    return "", []
 
 
 def split_text_with_pages(page_texts, document_name):
@@ -70,7 +102,7 @@ def split_text_with_pages(page_texts, document_name):
     return chunks
 
 
-def process_uploaded_documents(uploaded_files):
+def process_uploaded_documents(uploaded_files, ocr_engine="GLM-OCR"):
     all_text = ""
     all_chunks = []
     document_names = []
@@ -79,7 +111,10 @@ def process_uploaded_documents(uploaded_files):
         document_name = file.name
         document_names.append(document_name)
 
-        document_text, page_texts = read_uploaded_file(file)
+        document_text, page_texts = read_uploaded_file(
+            file,
+            ocr_engine=ocr_engine
+        )
 
         all_text += f"\n\n--- Document: {document_name} ---\n"
         all_text += document_text

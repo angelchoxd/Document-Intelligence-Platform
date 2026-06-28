@@ -16,7 +16,7 @@ st.set_page_config(
 
 st.title("Document Intelligence Platform")
 st.write(
-    "Upload multiple documents, generate summaries, search semantically, "
+    "Upload documents or images, generate summaries, search semantically, "
     "and chat with your files using a local AI model."
 )
 
@@ -41,6 +41,13 @@ for key, value in default_values.items():
 
 with st.sidebar:
     st.header("Controls")
+
+    selected_ocr_engine = st.selectbox(
+        "OCR Engine",
+        ["GLM-OCR", "DeepSeek-OCR", "Auto"],
+        index=0,
+        key="selected_ocr_engine",
+    )
 
     if st.button("Clear Chat", use_container_width=True):
         st.session_state.chat_history = []
@@ -70,20 +77,22 @@ with st.sidebar:
 
 
 uploaded_files = st.file_uploader(
-    "Upload PDF or TXT documents",
-    type=["pdf", "txt"],
+    "Upload PDF, TXT, PNG, JPG or JPEG files",
+    type=["pdf", "txt", "png", "jpg", "jpeg"],
     accept_multiple_files=True
 )
 
 
 current_file_signature = [
-    (file.name, file.size) for file in uploaded_files
+    (file.name, file.size, selected_ocr_engine)
+    for file in uploaded_files
 ] if uploaded_files else []
 
 
 if uploaded_files and current_file_signature != st.session_state.uploaded_file_signature:
     all_document_text, all_chunks, document_names = process_uploaded_documents(
-        uploaded_files
+        uploaded_files,
+        ocr_engine=selected_ocr_engine
     )
 
     collection, embeddings_model = create_vector_database(all_chunks)
@@ -156,11 +165,7 @@ if st.session_state.documents_processed:
         st.write(st.session_state.ai_insights)
 
     with st.expander("Preview Extracted Text"):
-        st.text_area(
-            "",
-            st.session_state.all_document_text,
-            height=250
-        )
+        st.text_area("", st.session_state.all_document_text, height=250)
 
     with st.expander("Preview Chunks with Document and Page References"):
         for i, chunk in enumerate(st.session_state.all_chunks):
@@ -186,10 +191,7 @@ if st.session_state.documents_processed:
 
     if prompt:
         st.session_state.chat_history.append(
-            {
-                "role": "user",
-                "content": prompt
-            }
+            {"role": "user", "content": prompt}
         )
 
         with st.chat_message("user"):
@@ -207,10 +209,7 @@ if st.session_state.documents_processed:
             answer = ask_question(prompt, context)
 
         st.session_state.chat_history.append(
-            {
-                "role": "assistant",
-                "content": answer
-            }
+            {"role": "assistant", "content": answer}
         )
 
         with st.chat_message("assistant"):
@@ -233,4 +232,4 @@ if st.session_state.documents_processed:
                     )
 
 else:
-    st.info("Upload one or more PDF/TXT documents to begin.")
+    st.info("Upload one or more PDF/TXT/image files to begin.")
