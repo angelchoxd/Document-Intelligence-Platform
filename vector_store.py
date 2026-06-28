@@ -49,3 +49,19 @@ def retrieve_relevant_chunks(question, collection, embeddings_model):
     )
 
     return results["documents"][0], results["metadatas"][0]
+
+
+def search_relevant_chunks(query, collection, embeddings_model, n_results=5):
+    query_embedding = embeddings_model.embed_query(query)
+
+    results = collection.query(
+        query_embeddings=[query_embedding],
+        n_results=n_results,
+        include=["documents", "metadatas", "distances"],
+    )
+
+    documents = results["documents"][0]
+    metadatas = results["metadatas"][0]
+    distances = results["distances"][0]
+
+    return documents, metadatas, distances

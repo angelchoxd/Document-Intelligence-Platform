@@ -1,5 +1,15 @@
+import re
 import subprocess
 from pathlib import Path
+
+
+def clean_ocr_text(text):
+    text = re.sub(r"https?://example\.com/\S*", "", text)
+    text = re.sub(r"!\[.*?\]\(.*?\)", "", text)
+    text = text.replace("Image path:", "")
+    text = text.strip()
+
+    return text
 
 
 def run_ollama_ocr(image_path, model_name):
@@ -7,7 +17,9 @@ def run_ollama_ocr(image_path, model_name):
 
     prompt = (
         "Extract all readable text from this image. "
-        "Return only the extracted text. Do not explain anything. "
+        "Return only the extracted text. "
+        "Do not explain anything. "
+        "Do not add image links, placeholder URLs, markdown image tags, or example links. "
         f"Image path: {image_path}"
     )
 
@@ -22,7 +34,7 @@ def run_ollama_ocr(image_path, model_name):
     if result.returncode != 0:
         return f"OCR error: {result.stderr}"
 
-    return result.stdout.strip()
+    return clean_ocr_text(result.stdout)
 
 
 def glm_ocr(image_path):
@@ -33,7 +45,7 @@ def deepseek_ocr(image_path):
     return run_ollama_ocr(image_path, "deepseek-ocr:latest")
 
 
-def extract_text_from_image(image_path, engine="GLM-OCR"):
+def extract_text_from_image(image_path, engine="Auto"):
     if engine == "GLM-OCR":
         return glm_ocr(image_path)
 
