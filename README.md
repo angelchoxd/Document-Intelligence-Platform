@@ -138,6 +138,7 @@ These files can be used to test document upload, OCR, semantic search, AI summar
 ```text
 AI-Knowledge-Assistant/
 │
+├── sample_documents/
 ├── screenshots/
 ├── ui/
 ├── app.py
