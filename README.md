@@ -45,7 +45,7 @@ cd Document-Intelligence-Platform
 Create a virtual environment
 
 ```bash
-python -m venv .venv
+py -m venv .venv
 ```
 
 Activate the environment
