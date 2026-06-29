@@ -136,7 +136,7 @@ These files can be used to test document upload, OCR, semantic search, AI summar
 ## Project Structure
 
 ```text
-AI-Knowledge-Assistant/
+Document-Intelligence-Platform/
 │
 ├── sample_documents/
 ├── screenshots/
