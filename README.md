@@ -141,6 +141,7 @@ Document-Intelligence-Platform/
 ├── sample_documents/
 ├── screenshots/
 ├── ui/
+│
 ├── app.py
 ├── llm.py
 ├── ocr_engine.py
@@ -150,6 +151,7 @@ Document-Intelligence-Platform/
 ├── export_utils.py
 ├── prompts.py
 ├── config.py
+│
 ├── requirements.txt
 └── README.md
 ```
